@@ -4,13 +4,13 @@ const firebaseConfig = {
     projectId: "pooker-40a93"
 };
 
-if (!firebase.apps.length) {
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-const database = firebase.database();
-const requestsRef = database.ref('server2_requests');
-const approvedRef = database.ref('server2_approved');
+const database = typeof firebase !== 'undefined' ? firebase.database() : null;
+const requestsRef = database ? database.ref('server2_requests') : null;
+const approvedRef = database ? database.ref('server2_approved') : null;
 
 const modal = document.getElementById('rulesModal');
 const openBtn = document.getElementById('openRulesBtn');
@@ -51,63 +51,70 @@ function showToast(message, isError = false) {
 
     setTimeout(() => { 
         if (toast) toast.remove(); 
-    }, 2500);
+    }, 3500);
 }
 
-approvedRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    const listDiv = document.getElementById('approvedPlayersList');
-    const countSpan = document.getElementById('slotsCount');
-    const statusSpan = document.getElementById('eventStatus');
+if (approvedRef) {
+    approvedRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        const listDiv = document.getElementById('approvedPlayersList');
+        const countSpan = document.getElementById('slotsCount');
+        const statusSpan = document.getElementById('eventStatus');
 
-    if (!listDiv) return;
-    listDiv.innerHTML = '';
-    
-    if (!data) {
-        if (countSpan) countSpan.textContent = '0';
+        if (!listDiv) return;
+        listDiv.innerHTML = '';
+        
+        if (!data) {
+            if (countSpan) countSpan.textContent = '0';
+            if (statusSpan) {
+                statusSpan.textContent = 'Набор открыт';
+                statusSpan.className = 'van';
+            }
+            listDiv.innerHTML = '<span class="fri">Участников пока нет</span>';
+            return;
+        }
+        
+        const total = Object.keys(data).length;
+        if (countSpan) countSpan.textContent = total;
+        
         if (statusSpan) {
-            statusSpan.textContent = 'Набор открыт';
-            statusSpan.className = 'van';
+            if (total >= 9) {
+                statusSpan.textContent = 'Набор закрыт';
+                statusSpan.style.color = '#7A2B2D';
+            } else {
+                statusSpan.textContent = 'Набор открыт';
+                statusSpan.className = 'van';
+            }
         }
-        listDiv.innerHTML = '<span class="fri">Участников пока нет</span>';
-        return;
-    }
-    
-    const total = Object.keys(data).length;
-    if (countSpan) countSpan.textContent = total;
-    
-    if (statusSpan) {
-        if (total >= 9) {
-            statusSpan.textContent = 'Набор закрыт';
-            statusSpan.style.color = '#7A2B2D';
-        } else {
-            statusSpan.textContent = 'Набор открыт';
-            statusSpan.className = 'van';
+        
+        let index = 1;
+        for (let id in data) {
+            if (data[id] && data[id].nickname) {
+                listDiv.innerHTML += `<div><b>${index}.</b> ${data[id].nickname}</div>`;
+                index++;
+            }
         }
-    }
-    
-    let index = 1;
-    for (let id in data) {
-        if (data[id] && data[id].nickname) {
-            listDiv.innerHTML += `<div><b>${index}.</b> ${data[id].nickname}</div>`;
-            index++;
-        }
-    }
-}, (error) => {
-    console.error("Ошибка чтения approvedRef:", error);
-});
+    });
+}
 
 const regForm = document.getElementById('regForm');
 if (regForm) {
-    regForm.addEventListener('submit', (e) => {
+    regForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        if (!database || !requestsRef || !approvedRef) {
+            showToast('Firebase SDK не загрузился!', true);
+            return;
+        }
+
         const nickInput = document.getElementById('nickInput');
         if (!nickInput) return;
         
         const nick = nickInput.value.trim();
         if (!nick) return;
 
-        approvedRef.once('value').then((appSnap) => {
+        try {
+            const appSnap = await approvedRef.once('value');
             const approved = appSnap.val() || {};
             
             if (Object.keys(approved).length >= 9) {
@@ -115,33 +122,27 @@ if (regForm) {
                 return;
             }
 
-            requestsRef.once('value').then((reqSnap) => {
-                const pending = reqSnap.val() || {};
-                
-                const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
-                                    Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
+            const reqSnap = await requestsRef.once('value');
+            const pending = reqSnap.val() || {};
+            
+            const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
+                                Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
 
-                if (isNickTaken) {
-                    showToast('Этот ник уже подал заявку!', true);
-                    return;
-                }
+            if (isNickTaken) {
+                showToast('Этот ник уже подал заявку!', true);
+                return;
+            }
 
-                requestsRef.push({ 
-                    nickname: nick, 
-                    date: new Date().toISOString() 
-                }).then(() => {
-                    showToast('Заявка успешно отправлена!');
-                    nickInput.value = '';
-                }).catch((err) => {
-                    showToast('Ошибка записи: ' + err.message, true);
-                });
-            }).catch((err) => {
-                showToast('Ошибка запроса заявок', true);
-                console.error(err);
+            await requestsRef.push({ 
+                nickname: nick, 
+                date: new Date().toISOString() 
             });
-        }).catch((err) => {
-            showToast('Ошибка запроса участников', true);
-            console.error(err);
-        });
+
+            showToast('Заявка успешно отправлена!');
+            nickInput.value = '';
+
+        } catch (err) {
+            showToast('Ошибка: ' + (err.message || 'Ошибка БД'), true);
+        }
     });
 }
