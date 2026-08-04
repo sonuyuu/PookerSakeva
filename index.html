@@ -107,8 +107,8 @@
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const requestsRef = database.ref('requests');
-    const approvedRef = database.ref('approved');
+    const requestsRef = database.ref('server2_requests');
+    const approvedRef = database.ref('server2_approved');
 
     // Логика открытия/закрытия окна правил
     const modal = document.getElementById('rulesModal');
@@ -226,4 +226,5 @@
     });
   </script>
 </body>
-    </html>
+</html>
+
