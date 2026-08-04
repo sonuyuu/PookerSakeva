@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pooker Ивент</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1 class="naz">Pooker</h1>
+  <p class="pnaz">сайт sk</p>
+
+  <!-- БЛОК 1: Подача заявки -->
+  <div class="pod">
+    <h2 class="za">Заявка на Ивент</h2>
+    <div class="zaa">занято мест: <span id="slotsCount">0</span> из 9</div>
+    <form id="regForm">
+      <input type="text" id="nickInput" class="nil" placeholder="Введите ваш ник на сервере" required>
+      <button type="submit" class="tt">Подать Заявку</button>
+    </form>
+  </div>
+
+  <!-- БЛОК 2: Скачать ресурспак -->
+  <a href="Pokerpak.zip" download class="kno">Скачать Ресурспак (.zip)</a>
+
+  <!-- БЛОК 3: Информация о ивенте -->
+  <div class="pod" style="height: auto;">
+    <h2 class="za">Информация о Ивенте</h2>
+    <p class="ty"><strong>Статус:</strong> <span id="eventStatus" class="van">Набор открыт</span></p>
+    <p class="ty"><strong>Дата:</strong> -- августа</p>
+    <p class="ty"><strong>Время:</strong> --:-- МСК</p>
+    <p class="ty"><strong>Вид:</strong> Техасский Холдем</p>
+    <p class="ty"><strong>Координаты:</strong> --- --- ---</p>
+
+  </div>
+
+  <!-- Кнопка правила холдема -->
+  <a href="https://ru.wikipedia.org/wiki/Техасский_холдем" target="_blank" class="kno">Правила Техасского Холдема</a>
+
+  <!-- БЛОК 4: Принятые участники -->
+  <div class="yyy">
+    <h2 class="za">Принятые Участники</h2>
+    <div id="approvedPlayersList" class="tyyy">
+      Загрузка списка...
+    </div>
+  </div>
+
+  <!-- Кнопка правила ивента (Открывает модалку) -->
+  <a href="#" id="openRulesBtn" class="kno" style="margin-bottom: 30px;">Правила Ивента</a>
+
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) С ТВОИМИ ПРАВИЛАМИ -->
+  <div id="rulesModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Правила Ивента</h2>
+      <div class="modal-text">
+        
+        <p style="color: #E5A93B; font-weight: bold; margin-bottom: 5px;">Покер:</p>
+        <ul>
+          <li>Играется техасский холдем.</li>
+          <li>В начале турнира игроки решают, сколько ставят. Если игроки решили поставить по 64 ар., то каждый игрок скидывается по 64 ара.</li>
+          <li>После сбора ставок каждому раздается по 60-100 фишек.</li>
+          <li>Если игрок проиграл все свои фишки, то для него турнир закончен и он выбывает.</li>
+          <li>Игрок выигрывает в турнире, если все остальные участники турнира проиграли все свои фишки.</li>
+          <li>Выигравший игрок забирает банк, поставленный в начале игры.</li>
+        </ul>
+        <ul>
+          <li>Карты раздаются игрокам в бочки под их местами.</li>
+          <li>По центру стола стоит бочка, в которой игроки делают ставки.</li>
+          <li>Сверху слоты в бочке пронумерованы от 1 до 9, каждое место имеет свой номер (узнать номер своего места можно на табличке возле мест).</li>
+          <li>На каждого игрока имеется по 3 слота в бочке на центре стола.</li>
+          <li>Над местом крупье висят 5 светящихся рамок. В них располагаются 5 общих карт.</li>
+          <li>Если вы пасуете — отдайте свои карты крупье или положите их в бочку на центре.</li>
+        </ul>
+
+        <p style="color: #E5A93B; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">Раздача:</p>
+        <ul>
+          <li>Мы за честную игру, именно поэтому у нас установлен механизм, который тщательно перемешивает карты, после чего они раздаются игрокам в бочки под их местами.</li>
+          <li>Бочки расположены так, что никто из соседей не сможет заглянуть не в свою бочку.</li>
+          <li>Раздача карт происходит автоматически без участия крупье дабы избежать подтасовки карт. Раздача идет 1-2 минуты.</li>
+        </ul>
+
+        <p style="color: #E5A93B; font-weight: bold; margin-top: 15px; margin-bottom: 5px;">Поведение и запреты:</p>
+        <ul>
+          <li>В покере действуют те же основные правила ивентов: не создавать какие-либо помехи игрокам, игровому процессу и т.д.</li>
+          <li>Не ломать, не портить имущество и сам покер.</li>
+          <li>Строго запрещено заходить за стены покера в механизм.</li>
+          <li>Запрещено каким-либо способом жульничать.</li>
+          <li>Вы обязаны выполнять просьбы крупье по типу: быть тише, не мешать и т.д.</li>
+          <li>Перед началом турнира очистите свой инвентарь от всех предметов, брони и т.д. Допускаются лишь еда и напитки из бара покера.</li>
+          <li>Создатель покера забирает себе 10% от выйгрышей и крупье забирает себе 5%</li>
+          <li>Ресурс пак с картами, помещение и все механизмы это собственность покера и к использованию без разрешения запрещены</li>
+        </ul>
+
+      </div>
+      <button id="closeRulesBtn" class="tt">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBCiu3wo6o8CSZtbGxqXlLCFoQpRW3Z3aQ",
+        databaseURL: "https://pooker-40a93-default-rtdb.firebaseio.com",
+        projectId: "pooker-40a93"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const requestsRef = database.ref('requests');
+    const approvedRef = database.ref('approved');
+
+    // Логика открытия/закрытия окна правил
+    const modal = document.getElementById('rulesModal');
+    const openBtn = document.getElementById('openRulesBtn');
+    const closeBtn = document.getElementById('closeRulesBtn');
+
+    openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      modal.classList.add('active');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    // Закрытие при клике на темную область вокруг окна
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    function showToast(message, isError = false) {
+      const oldToast = document.getElementById('main-toast');
+      if (oldToast) oldToast.remove();
+      const toast = document.createElement('div');
+      toast.id = 'main-toast';
+      toast.textContent = message;
+      toast.style.position = 'fixed';
+      toast.style.top = '20px';
+      toast.style.left = '50%';
+      toast.style.transform = 'translateX(-50%)';
+      toast.style.padding = '12px 24px';
+      toast.style.borderRadius = '8px';
+      toast.style.zIndex = '99999';
+      toast.style.fontFamily = 'sans-serif';
+      toast.style.fontWeight = 'bold';
+      toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.6)';
+      toast.style.textAlign = 'center';
+      toast.style.backgroundColor = isError ? '#7A2B2D' : '#2C3E2B';
+      toast.style.color = isError ? '#ff8888' : '#00d100';
+      toast.style.border = 'none'; 
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 2500);
+    }
+
+    approvedRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      const listDiv = document.getElementById('approvedPlayersList');
+      const countSpan = document.getElementById('slotsCount');
+      const statusSpan = document.getElementById('eventStatus');
+      listDiv.innerHTML = '';
+      
+      if (!data) {
+        countSpan.textContent = '0';
+        listDiv.innerHTML = '<span class="fri">Участников пока нет</span>';
+        statusSpan.textContent = 'Набор открыт';
+        statusSpan.style.color = '#00d100';
+        return;
+      }
+      
+      const total = Object.keys(data).length;
+      countSpan.textContent = total;
+      
+      if (total >= 9) {
+        statusSpan.textContent = 'Набор закрыт';
+        statusSpan.style.color = '#7A2B2D';
+      } else {
+        statusSpan.textContent = 'Набор открыт';
+        statusSpan.style.color = '#00d100';
+      }
+      
+      let index = 1;
+      for (let id in data) {
+        if (data[id] && data[id].nickname) {
+          listDiv.innerHTML += `<div><b>${index}.</b> ${data[id].nickname}</div>`;
+          index++;
+        }
+      }
+    });
+
+    document.getElementById('regForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nickInput = document.getElementById('nickInput');
+      const nick = nickInput.value.trim();
+      
+      if (!nick) return;
+
+      Promise.all([approvedRef.once('value'), requestsRef.once('value')]).then(([appSnap, reqSnap]) => {
+        const approved = appSnap.val() || {};
+        const pending = reqSnap.val() || {};
+        
+        const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
+                            Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
+
+        if (isNickTaken) {
+          showToast('Этот ник уже подал заявку!', true);
+          return;
+        }
+
+        if (Object.keys(approved).length >= 9) {
+          showToast('Извините, мест больше нет!', true);
+          return;
+        }
+
+        requestsRef.push({ nickname: nick, date: new Date().toISOString() }).then(() => {
+          showToast('Заявка успешно отправлена!');
+          nickInput.value = '';
+        }).catch((err) => {
+          showToast('Ошибка отправки: ' + err.message, true);
+        });
+      }).catch((err) => {
+        showToast('Ошибка связи с базой данных', true);
+      });
+    });
+  </script>
+</body>
+    </html>
