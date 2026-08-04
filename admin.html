@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в панель Pooker</title>
+    <style>
+        body { 
+            background-color: #1a241f; 
+            color: #e0e0e0; 
+            font-family: sans-serif; 
+            padding: 20px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+        h1, h2 { color: #d4af37; text-align: center; }
+        h3 { border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 30px; }
+        
+        /* Стили формы авторизации */
+        .login-card {
+            background: #25332a;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #3d5245;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-top: 80px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            background: #121a16;
+            border: 1px solid #3d5245;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-login:hover { background-color: #388e3c; }
+
+        /* Стили элементов админки */
+        .player-item { 
+            background: #25332a; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border-radius: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid #3d5245; 
+        }
+        .actions button { 
+            margin-left: 5px; 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: bold; 
+        }
+        .btn-accept { background-color: #2e7d32; }
+        .btn-reject { background-color: #c62828; }
+        .btn-remove { 
+            background-color: rgba(198, 40, 40, 0.15); 
+            color: #ff5252; 
+            border: 1px solid #c62828 !important; 
+            padding: 6px 12px; 
+            font-size: 13px; 
+            border-radius: 4px; 
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-remove:hover { background-color: #c62828; color: white; }
+
+        #adminPanel { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- ОКНО ВХОДА (ТОЛЬКО ПАРОЛЬ) -->
+    <div id="authBlock" class="login-card">
+        <h2>Вход в Админ-панель</h2>
+        <form id="loginForm">
+            <label>Введите Пароль Администратора</label>
+            <input type="password" id="loginPassword" class="login-input" placeholder="••••••••" required>
+            <button type="submit" class="btn-login">Войти</button>
+        </form>
+    </div>
+
+    <!-- РАБОЧАЯ ПАНЕЛЬ -->
+    <div id="adminPanel">
+        <h1>Панель Модерации</h1>
+        
+        <h3>Новые заявки на ивент:</h3>
+        <div id="requestsList">Загрузка...</div>
+
+        <h3>Принятые участники (<span id="admCount">0</span> из 9):</h3>
+        <div id="approvedList">Загрузка...</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCiu3wo6o8CSZtbGxqXlLCFoQpRW3Z3aQ",
+            authDomain: "pooker-40a93.firebaseapp.com",
+            databaseURL: "https://pooker-40a93-default-rtdb.firebaseio.com",
+            projectId: "pooker-40a93",
+            storageBucket: "pooker-40a93.firebasestorage.app",
+            messagingSenderId: "778144053208",
+            appId: "1:778144053208:web:9a98608cef9032c07064ad",
+            measurementId: "G-E03Q979Z6H"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        
+        const requestsRef = database.ref('requests');
+        const approvedRef = database.ref('approved');
+
+        const authBlock = document.getElementById('authBlock');
+        const adminPanel = document.getElementById('adminPanel');
+        const loginForm = document.getElementById('loginForm');
+
+        function showAdminToast(message, isError = false) {
+            const oldToast = document.getElementById('admin-toast');
+            if (oldToast) oldToast.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'admin-toast';
+            toast.textContent = message;
+            
+            Object.assign(toast.style, {
+                position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+                backgroundColor: isError ? '#c62828' : '#2e7d32', color: 'white',
+                padding: '12px 24px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                zIndex: '10000', fontFamily: 'sans-serif', fontSize: '15px',
+                fontWeight: 'bold', textAlign: 'center', transition: 'opacity 0.3s ease',
+                opacity: '0', pointerEvents: 'none'
+            });
+
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '1'; }, 10);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Авторизация (Почта под капотом, запрашиваем только пароль)
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = "admin@pooker.ru"; 
+            const password = document.getElementById('loginPassword').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    showAdminToast('Успешный вход!');
+                })
+                .catch((error) => {
+                    showAdminToast('Неверный пароль!', true);
+                    console.error(error);
+                });
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                authBlock.style.display = 'none';
+                adminPanel.style.display = 'block';
+                startAdminListeners();
+            } else {
+                authBlock.style.display = 'block';
+                adminPanel.style.display = 'none';
+                stopAdminListeners();
+            }
+        });
+
+        let requestsListener, approvedListener;
+
+        function startAdminListeners() {
+            requestsListener = requestsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('requestsList');
+                container.innerHTML = '';
+
+                if (!data) {
+                    container.innerHTML = '<p style="color: #888;">Нет новых заявок.</p>';
+                    return;
+                }
+
+                for (let id in data) {
+                    const item = document.createElement('div');
+                    item.className = 'player-item';
+                    item.innerHTML = `
+                        <span>${data[id].nickname}</span>
+                        <div class="actions">
+                            <button class="btn-accept" onclick="acceptPlayer('${id}', '${data[id].nickname}', '${data[id].date}')">Принять</button>
+                            <button class="btn-reject" onclick="rejectPlayer('${id}')">Х</button>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                }
+            });
+
+            approvedListener = approvedRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('approvedList');
+                const countSpan = document.getElementById('admCount');
+                container.innerHTML = '';
+
+                if (!data) {
+                    countSpan.textContent = '0';
+                    container.innerHTML = '<p style="color: #888;">Список участников пуст.</p>';
+                    return;
+                }
+
+                const keys = Object.keys(data);
+                countSpan.textContent = keys.length;
+
+                let index = 1;
+                for (let id in data) {
+                    const item = document.createElement('div');
+                    item.className = 'player-item';
+                    item.style.borderColor = '#2e7d32';
+                    item.innerHTML = `
+                        <span><strong>${index}. ${data[id].nickname}</strong></span>
+                        <button class="btn-remove" onclick="removeApproved('${id}')">Убрать</button>
+                    `;
+                    container.appendChild(item);
+                    index++;
+                }
+            });
+        }
+
+        function stopAdminListeners() {
+            if (requestsListener) requestsRef.off('value', requestsListener);
+            if (approvedListener) approvedRef.off('value', approvedListener);
+        }
+
+        window.acceptPlayer = (id, nickname, date) => {
+            approvedRef.once('value').then((snapshot) => {
+                const data = snapshot.val() || {};
+                if (Object.keys(data).length >= 9) {
+                    showAdminToast('Нельзя принять! Уже набрано 9 человек.', true);
+                    return;
+                }
+                approvedRef.push({ nickname, date }).then(() => {
+                    requestsRef.child(id).remove();
+                    showAdminToast(`Игрок ${nickname} успешно принят!`);
+                });
+            });
+        };
+
+        window.rejectPlayer = (id) => {
+            requestsRef.child(id).remove();
+            showAdminToast('Заявка отклонена.', true);
+        };
+
+        window.removeApproved = (id) => {
+            approvedRef.child(id).remove();
+            showAdminToast('Игрок удален из участников.', true);
+        };
+    </script>
+</body>
+</html>
