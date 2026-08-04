@@ -3,9 +3,12 @@ const firebaseConfig = {
     databaseURL: "https://pooker-40a93-default-rtdb.firebaseio.com",
     projectId: "pooker-40a93"
 };
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
 
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const database = firebase.database();
 const requestsRef = database.ref('server2_requests');
 const approvedRef = database.ref('server2_approved');
 
@@ -90,6 +93,8 @@ approvedRef.on('value', (snapshot) => {
             index++;
         }
     }
+}, (error) => {
+    console.error("Ошибка чтения approvedRef:", error);
 });
 
 const regForm = document.getElementById('regForm');
@@ -102,34 +107,41 @@ if (regForm) {
         const nick = nickInput.value.trim();
         if (!nick) return;
 
-        Promise.all([approvedRef.once('value'), requestsRef.once('value')]).then(([appSnap, reqSnap]) => {
+        approvedRef.once('value').then((appSnap) => {
             const approved = appSnap.val() || {};
-            const pending = reqSnap.val() || {};
             
-            const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
-                                Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
-
-            if (isNickTaken) {
-                showToast('Этот ник уже подал заявку!', true);
-                return;
-            }
-
             if (Object.keys(approved).length >= 9) {
                 showToast('Извините, мест больше нет!', true);
                 return;
             }
 
-            requestsRef.push({ 
-                nickname: nick, 
-                date: new Date().toISOString() 
-            }).then(() => {
-                showToast('Заявка успешно отправлена!');
-                nickInput.value = '';
+            requestsRef.once('value').then((reqSnap) => {
+                const pending = reqSnap.val() || {};
+                
+                const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
+                                    Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
+
+                if (isNickTaken) {
+                    showToast('Этот ник уже подал заявку!', true);
+                    return;
+                }
+
+                requestsRef.push({ 
+                    nickname: nick, 
+                    date: new Date().toISOString() 
+                }).then(() => {
+                    showToast('Заявка успешно отправлена!');
+                    nickInput.value = '';
+                }).catch((err) => {
+                    showToast('Ошибка записи: ' + err.message, true);
+                });
             }).catch((err) => {
-                showToast('Ошибка отправки: ' + err.message, true);
+                showToast('Ошибка запроса заявок', true);
+                console.error(err);
             });
         }).catch((err) => {
-            showToast('Ошибка связи с базой данных', true);
+            showToast('Ошибка запроса участников', true);
+            console.error(err);
         });
     });
 }
