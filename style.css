@@ -1,1 +1,216 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  /* Убираем синее выделение при тапе на смартфонах для ВСЕХ элементов */
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  background-color: #1A1F16;
+}
+.naz {
+  text-align: center;
+  color: #edc375;
+  margin-top: 20px;
+}
+.pnaz {
+  text-align: center;
+  color: #795411;
+  font-weight: 1000;
+}
+.pod {
+  background-color: #2C3E2B;
+  width: 90%;
+  max-width: 500px;
+  margin: 15px auto;
+  border: 1vh solid #7A2B2D;
+  border-radius: 2vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.za {
+  color: #E5A93B;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.zaa {
+  color: #795411;
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+.nil {
+    width: 100%;
+    height: 45px;
+    margin-bottom: 12px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 1vh;
+    border: none;
+    outline: none;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+.nil::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+.nil:focus {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.tt {
+  display: block;
+  background-color: #832e31;
+  width: 100%;
+  height: 45px;
+  border-radius: 1vh;
+  color: #c7c7c7ff;
+  border: 0.5vh solid #7A2B2D;
+  font-weight: 1000;
+  cursor: pointer;
+  font-size: 16px;
+  outline: none;
+}
+.tt:active {
+  background-color: #7A2B2D;
+  color: #818181;
+}
+.yyy {
+  background-color: #2C3E2B;
+  width: 90%;
+  max-width: 500px;
+  margin: 15px auto;
+  border: 1vh solid #7A2B2D;
+  border-radius: 2vh;
+  padding: 20px;
+  box-sizing: border-box;
+  height: auto;
+  min-height: fit-content;
+}
+.kno {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #832e31;
+    height: 50px;
+    width: 90%;
+    max-width: 500px;
+    margin: 15px auto;
+    border-radius: 1vh;
+    border: 0.5vh solid #7A2B2D;
+    text-decoration: none;
+    color: #c7c7c7;
+    box-sizing: border-box;
+    font-weight: 1000;
+    outline: none;
+}
+.kno:active {
+  background-color: #7A2B2D;
+  color: #818181;
+}
+.ty {
+  color: #fff;
+  font-weight: 1000;
+  text-align: center;
+  margin: 5px 0;
+}
+.tyyy {
+  color: #fff;
+  font-weight: 1000;
+  text-align: center;
+  padding-top: 10px;
+  line-height: 1.6;
+}
+.fri {
+  color: #cecece;
+}
+.van {
+  color: #00d100;
+}
 
+/* Красивое фиксированное уведомление СВЕРХУ */
+#main-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 99999;
+  font-family: sans-serif;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  text-align: center;
+  width: auto;
+  white-space: nowrap;
+}
+
+/* ========================================== */
+/* СТИЛИ ДЛЯ ВСПЛЫВАЮЩЕГО ОКНА (МОДАЛКИ)      */
+/* ========================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background-color: #2C3E2B;
+  border: 1vh solid #7A2B2D;
+  border-radius: 2vh;
+  width: 90%;
+  max-width: 500px;
+  padding: 25px;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: sans-serif;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transform: scale(0.85);
+  transition: transform 0.25s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+.modal-content h2 {
+  color: #E5A93B;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.modal-text {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  max-height: 55vh;
+  overflow-y: auto;
+  font-weight: 500;
+}
+
+.modal-text ul {
+  padding-left: 20px;
+  margin-top: 8px;
+}
+
+.modal-text li {
+  margin-bottom: 8px;
+  }
