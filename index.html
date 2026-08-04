@@ -32,7 +32,6 @@
     <p class="ty"><strong>Время:</strong> --:-- МСК</p>
     <p class="ty"><strong>Вид:</strong> Техасский Холдем</p>
     <p class="ty"><strong>Координаты:</strong> --- --- ---</p>
-
   </div>
 
   <!-- Кнопка правила холдема -->
@@ -49,12 +48,11 @@
   <!-- Кнопка правила ивента (Открывает модалку) -->
   <a href="#" id="openRulesBtn" class="kno" style="margin-bottom: 30px;">Правила Ивента</a>
 
-  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) С ТВОИМИ ПРАВИЛАМИ -->
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) С ПРАВИЛАМИ -->
   <div id="rulesModal" class="modal-overlay">
     <div class="modal-content">
       <h2>Правила Ивента</h2>
       <div class="modal-text">
-        
         <p style="color: #E5A93B; font-weight: bold; margin-bottom: 5px;">Покер:</p>
         <ul>
           <li>Играется техасский холдем.</li>
@@ -91,140 +89,15 @@
           <li>Создатель покера забирает себе 10% от выйгрышей и крупье забирает себе 5%</li>
           <li>Ресурс пак с картами, помещение и все механизмы это собственность покера и к использованию без разрешения запрещены</li>
         </ul>
-
       </div>
       <button id="closeRulesBtn" class="tt">Закрыть</button>
     </div>
   </div>
 
+  <!-- Подключение скриптов Firebase и основного приложения -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBCiu3wo6o8CSZtbGxqXlLCFoQpRW3Z3aQ",
-        databaseURL: "https://pooker-40a93-default-rtdb.firebaseio.com",
-        projectId: "pooker-40a93"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const requestsRef = database.ref('server2_requests');
-    const approvedRef = database.ref('server2_approved');
+  <script src="app.js"></script>
 
-    // Логика открытия/закрытия окна правил
-    const modal = document.getElementById('rulesModal');
-    const openBtn = document.getElementById('openRulesBtn');
-    const closeBtn = document.getElementById('closeRulesBtn');
-
-    openBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      modal.classList.add('active');
-    });
-
-    closeBtn.addEventListener('click', () => {
-      modal.classList.remove('active');
-    });
-
-    // Закрытие при клике на темную область вокруг окна
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('active');
-      }
-    });
-
-    function showToast(message, isError = false) {
-      const oldToast = document.getElementById('main-toast');
-      if (oldToast) oldToast.remove();
-      const toast = document.createElement('div');
-      toast.id = 'main-toast';
-      toast.textContent = message;
-      toast.style.position = 'fixed';
-      toast.style.top = '20px';
-      toast.style.left = '50%';
-      toast.style.transform = 'translateX(-50%)';
-      toast.style.padding = '12px 24px';
-      toast.style.borderRadius = '8px';
-      toast.style.zIndex = '99999';
-      toast.style.fontFamily = 'sans-serif';
-      toast.style.fontWeight = 'bold';
-      toast.style.boxShadow = '0 4px 15px rgba(0,0,0,0.6)';
-      toast.style.textAlign = 'center';
-      toast.style.backgroundColor = isError ? '#7A2B2D' : '#2C3E2B';
-      toast.style.color = isError ? '#ff8888' : '#00d100';
-      toast.style.border = 'none'; 
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 2500);
-    }
-
-    approvedRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      const listDiv = document.getElementById('approvedPlayersList');
-      const countSpan = document.getElementById('slotsCount');
-      const statusSpan = document.getElementById('eventStatus');
-      listDiv.innerHTML = '';
-      
-      if (!data) {
-        countSpan.textContent = '0';
-        listDiv.innerHTML = '<span class="fri">Участников пока нет</span>';
-        statusSpan.textContent = 'Набор открыт';
-        statusSpan.style.color = '#00d100';
-        return;
-      }
-      
-      const total = Object.keys(data).length;
-      countSpan.textContent = total;
-      
-      if (total >= 9) {
-        statusSpan.textContent = 'Набор закрыт';
-        statusSpan.style.color = '#7A2B2D';
-      } else {
-        statusSpan.textContent = 'Набор открыт';
-        statusSpan.style.color = '#00d100';
-      }
-      
-      let index = 1;
-      for (let id in data) {
-        if (data[id] && data[id].nickname) {
-          listDiv.innerHTML += `<div><b>${index}.</b> ${data[id].nickname}</div>`;
-          index++;
-        }
-      }
-    });
-
-    document.getElementById('regForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nickInput = document.getElementById('nickInput');
-      const nick = nickInput.value.trim();
-      
-      if (!nick) return;
-
-      Promise.all([approvedRef.once('value'), requestsRef.once('value')]).then(([appSnap, reqSnap]) => {
-        const approved = appSnap.val() || {};
-        const pending = reqSnap.val() || {};
-        
-        const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
-                            Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
-
-        if (isNickTaken) {
-          showToast('Этот ник уже подал заявку!', true);
-          return;
-        }
-
-        if (Object.keys(approved).length >= 9) {
-          showToast('Извините, мест больше нет!', true);
-          return;
-        }
-
-        requestsRef.push({ nickname: nick, date: new Date().toISOString() }).then(() => {
-          showToast('Заявка успешно отправлена!');
-          nickInput.value = '';
-        }).catch((err) => {
-          showToast('Ошибка отправки: ' + err.message, true);
-        });
-      }).catch((err) => {
-        showToast('Ошибка связи с базой данных', true);
-      });
-    });
-  </script>
 </body>
 </html>
-
