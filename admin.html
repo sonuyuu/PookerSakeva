@@ -130,8 +130,8 @@
         const database = firebase.database();
         const auth = firebase.auth();
         
-        const requestsRef = database.ref('requests');
-        const approvedRef = database.ref('approved');
+        const requestsRef = database.ref('server2_requests');
+        const approvedRef = database.ref('server2_approved');
 
         const authBlock = document.getElementById('authBlock');
         const adminPanel = document.getElementById('adminPanel');
@@ -268,7 +268,7 @@
 
         window.rejectPlayer = (id) => {
             requestsRef.child(id).remove();
-            showAdminToast('Заявка отклонена.', true);
+                    showAdminToast('Заявка отклонена.', true);
         };
 
         window.removeApproved = (id) => {
