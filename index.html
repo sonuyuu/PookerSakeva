@@ -32,7 +32,6 @@
     <p class="ty"><strong>Время:</strong> --:-- МСК</p>
     <p class="ty"><strong>Вид:</strong> Техасский Холдем</p>
     <p class="ty"><strong>Координаты:</strong> --- --- ---</p>
-
   </div>
 
   <!-- Кнопка правила холдема -->
@@ -49,12 +48,11 @@
   <!-- Кнопка правила ивента (Открывает модалку) -->
   <a href="#" id="openRulesBtn" class="kno" style="margin-bottom: 30px;">Правила Ивента</a>
 
-  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) С ТВОИМИ ПРАВИЛАМИ -->
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО (МОДАЛКА) С ПРАВИЛАМИ -->
   <div id="rulesModal" class="modal-overlay">
     <div class="modal-content">
       <h2>Правила Ивента</h2>
       <div class="modal-text">
-        
         <p style="color: #E5A93B; font-weight: bold; margin-bottom: 5px;">Покер:</p>
         <ul>
           <li>Играется техасский холдем.</li>
@@ -91,7 +89,6 @@
           <li>Создатель покера забирает себе 10% от выйгрышей и крупье забирает себе 5%</li>
           <li>Ресурс пак с картами, помещение и все механизмы это собственность покера и к использованию без разрешения запрещены</li>
         </ul>
-
       </div>
       <button id="closeRulesBtn" class="tt">Закрыть</button>
     </div>
@@ -110,7 +107,6 @@
     const requestsRef = database.ref('server2_requests');
     const approvedRef = database.ref('server2_approved');
 
-    // Логика открытия/закрытия окна правил
     const modal = document.getElementById('rulesModal');
     const openBtn = document.getElementById('openRulesBtn');
     const closeBtn = document.getElementById('closeRulesBtn');
@@ -124,7 +120,6 @@
       modal.classList.remove('active');
     });
 
-    // Закрытие при клике на темную область вокруг окна
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.classList.remove('active');
@@ -227,4 +222,3 @@
   </script>
 </body>
 </html>
-
