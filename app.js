@@ -1,135 +1,135 @@
-const regForm = document.getElementById('regForm');
-const playerNickInput = document.getElementById('playerNick');
-const slotsCount = document.getElementById('slotsCount');
-const statusText = document.getElementById('statusText');
-const approvedPlayersList = document.getElementById('approvedPlayersList'); // Новый элемент
-
 const firebaseConfig = {
     apiKey: "AIzaSyBCiu3wo6o8CSZtbGxqXlLCFoQpRW3Z3aQ",
-    authDomain: "pooker-40a93.firebaseapp.com",
     databaseURL: "https://pooker-40a93-default-rtdb.firebaseio.com",
-    projectId: "pooker-40a93",
-    storageBucket: "pooker-40a93.firebasestorage.app",
-    messagingSenderId: "778144053208",
-    appId: "1:778144053208:web:9a98608cef9032c07064ad",
-    measurementId: "G-E03Q979Z6H"
+    projectId: "pooker-40a93"
 };
-
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-const requestsRef = database.ref('requests');
-const approvedRef = database.ref('approved');
 
-// Функция для красивого всплывающего уведомления
+const requestsRef = database.ref('server2_requests');
+const approvedRef = database.ref('server2_approved');
+
+const modal = document.getElementById('rulesModal');
+const openBtn = document.getElementById('openRulesBtn');
+const closeBtn = document.getElementById('closeRulesBtn');
+
+if (openBtn && modal) {
+    openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.add('active');
+    });
+}
+
+if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+}
+
+if (modal) {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+}
+
 function showToast(message, isError = false) {
-    const oldToast = document.getElementById('custom-toast');
+    const oldToast = document.getElementById('main-toast');
     if (oldToast) oldToast.remove();
 
     const toast = document.createElement('div');
-    toast.id = 'custom-toast';
+    toast.id = 'main-toast';
     toast.textContent = message;
+    toast.style.backgroundColor = isError ? '#7A2B2D' : '#2C3E2B';
+    toast.style.color = isError ? '#ff8888' : '#00d100';
     
-    Object.assign(toast.style, {
-        position: 'fixed',
-        top: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        backgroundColor: isError ? '#c62828' : '#2e7d32',
-        color: 'white',
-        padding: '12px 24px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-        zIndex: '10000',
-        fontFamily: 'sans-serif',
-        fontSize: '15px',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
-        opacity: '0',
-        pointerEvents: 'none'
-    });
-
     document.body.appendChild(toast);
 
-    setTimeout(() => { toast.style.opacity = '1'; }, 10);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => { 
+        if (toast) toast.remove(); 
+    }, 2500);
 }
 
-// Живое обновление счетчика, статуса и списка игроков на главной
 approvedRef.on('value', (snapshot) => {
     const data = snapshot.val();
-    let totalPlayers = 0;
-    
-    // Очищаем список перед выводом
-    approvedPlayersList.innerHTML = '';
+    const listDiv = document.getElementById('approvedPlayersList');
+    const countSpan = document.getElementById('slotsCount');
+    const statusSpan = document.getElementById('eventStatus');
 
-    if (data) {
-        totalPlayers = Object.keys(data).length;
-        
-        // Формируем красивый список ников
-        let index = 1;
-        let htmlContent = '';
-        for (let id in data) {
-            htmlContent += `<div><strong>${index}.</strong> ${data[id].nickname}</div>`;
-            index++;
+    if (!listDiv) return;
+    listDiv.innerHTML = '';
+    
+    if (!data) {
+        if (countSpan) countSpan.textContent = '0';
+        if (statusSpan) {
+            statusSpan.textContent = 'Набор открыт';
+            statusSpan.className = 'van';
         }
-        approvedPlayersList.innerHTML = htmlContent;
-    } else {
-        approvedPlayersList.innerHTML = '<div style="color: #888; text-align: center;">Участников пока нет</div>';
+        listDiv.innerHTML = '<span class="fri">Участников пока нет</span>';
+        return;
     }
     
-    slotsCount.textContent = totalPlayers;
-
-    if (totalPlayers >= 9) {
-        statusText.textContent = "Набор закрыт";
-        statusText.style.color = "red";
-    } else {
-        statusText.textContent = "Набор открыт";
-        statusText.style.color = "";
+    const total = Object.keys(data).length;
+    if (countSpan) countSpan.textContent = total;
+    
+    if (statusSpan) {
+        if (total >= 9) {
+            statusSpan.textContent = 'Набор закрыт';
+            statusSpan.style.color = '#7A2B2D';
+        } else {
+            statusSpan.textContent = 'Набор открыт';
+            statusSpan.className = 'van';
+        }
+    }
+    
+    let index = 1;
+    for (let id in data) {
+        if (data[id] && data[id].nickname) {
+            listDiv.innerHTML += `<div><b>${index}.</b> ${data[id].nickname}</div>`;
+            index++;
+        }
     }
 });
 
-regForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const nick = playerNickInput.value.trim();
-    if (!nick) return;
-
-    approvedRef.once('value').then((appSnapshot) => {
-        const appData = appSnapshot.val() || {};
-        const approvedList = Object.values(appData);
+const regForm = document.getElementById('regForm');
+if (regForm) {
+    regForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nickInput = document.getElementById('nickInput');
+        if (!nickInput) return;
         
-        if (approvedList.length >= 9) {
-            showToast('Извини, все места на ивент уже заняты!', true);
-            return;
-        }
+        const nick = nickInput.value.trim();
+        if (!nick) return;
 
-        const isApproved = approvedList.some(p => p.nickname.toLowerCase() === nick.toLowerCase());
-        if (isApproved) {
-            showToast('Этот ник уже принят на ивент!', true);
-            return;
-        }
-
-        requestsRef.once('value').then((reqSnapshot) => {
-            const reqData = reqSnapshot.val() || {};
-            const reqList = Object.values(reqData);
+        Promise.all([approvedRef.once('value'), requestsRef.once('value')]).then(([appSnap, reqSnap]) => {
+            const approved = appSnap.val() || {};
+            const pending = reqSnap.val() || {};
             
-            const isRequested = reqList.some(p => p.nickname.toLowerCase() === nick.toLowerCase());
-            if (isRequested) {
-                showToast('Ты уже подал заявку, ожидай одобрения!', true);
+            const isNickTaken = Object.values(approved).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase()) ||
+                                Object.values(pending).some(p => p && p.nickname && p.nickname.toLowerCase() === nick.toLowerCase());
+
+            if (isNickTaken) {
+                showToast('Этот ник уже подал заявку!', true);
                 return;
             }
 
-            requestsRef.push({
-                nickname: nick,
-                date: new Date().toLocaleString()
+            if (Object.keys(approved).length >= 9) {
+                showToast('Извините, мест больше нет!', true);
+                return;
+            }
+
+            requestsRef.push({ 
+                nickname: nick, 
+                date: new Date().toISOString() 
             }).then(() => {
-                showToast('Заявка успешно отправлена на рассмотрение!');
-                playerNickInput.value = '';
+                showToast('Заявка успешно отправлена!');
+                nickInput.value = '';
+            }).catch((err) => {
+                showToast('Ошибка отправки: ' + err.message, true);
             });
+        }).catch((err) => {
+            showToast('Ошибка связи с базой данных', true);
         });
     });
-});
+}
